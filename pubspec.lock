@@ -22,13 +22,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.0"
-  boolean_selector:
-    dependency: transitive
-    description:
-      name: boolean_selector
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.4"
   build:
     dependency: transitive
     description:
@@ -164,11 +157,6 @@ packages:
     version: "0.10.9"
   flutter:
     dependency: "direct main"
-    description: flutter
-    source: sdk
-    version: "0.0.0"
-  flutter_test:
-    dependency: "direct dev"
     description: flutter
     source: sdk
     version: "0.0.0"
@@ -408,13 +396,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.0"
-  test_api:
-    dependency: transitive
-    description:
-      name: test_api
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.2.5"
   typed_data:
     dependency: transitive
     description:

@@ -1,9 +1,24 @@
-
 import 'package:my_flutter/model/weather.dart';
+import 'package:my_flutter/network/http_controller.dart';
 
 enum WeatherTime { TODAY, TOMORROW }
 
 class WeatherManager {
+  void requestWeather(
+      void weatherCallback(Weather mWeather), void errorCallback(String s)) {
+    var map = new Map<String, String>();
+    map["city"] = "上海";
+    map["key"] = "dd1b2fbe2610bb4acb3a7a065697a7c0";
+    HttpController.get("http://apis.juhe.cn/simpleWeather/query", map,
+        callBack: (response) {
+      Weather weatherModel = Weather.fromJson(response);
+      weatherCallback(weatherModel);
+      print("jason," + response.toString());
+    }, errorCallBack: (error) {
+      print("jason," + error);
+      errorCallback(error);
+    });
+  }
 
   String getWeather(Result result, WeatherTime time) {
     switch (time) {
@@ -81,7 +96,6 @@ class WeatherManager {
     return (wid >= 13 && wid <= 17) || (wid >= 26 && wid <= 28);
   }
 }
-
 
 //{
 //"reason": "查询成功",

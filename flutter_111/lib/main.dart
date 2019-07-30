@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:local_notifications/local_notifications.dart';
 
 import 'game.dart';
 import 'manager/weather_manager.dart';
@@ -72,7 +71,7 @@ class MainPageState extends State<MainPage> {
           RaisedButton(
               child: Text("jason的小游戏"),
               onPressed: () {
-                notify();
+//                notify();
 //                Navigator.push(
 //                  context,
 //                  new MaterialPageRoute(builder: (context) => new Game()),
@@ -102,28 +101,28 @@ class MainPageState extends State<MainPage> {
     });
   }
 
-  static const AndroidNotificationChannel channel = const AndroidNotificationChannel(
-    id: 'some_channel_id',
-    name: 'My app feature that requires notifications',
-    description: 'Grant this app the ability to show notifications for this app feature',
-    importance: AndroidNotificationChannelImportance.HIGH, // default value for constructor
-    vibratePattern: AndroidVibratePatterns.DEFAULT, // default value for constructor
-  );
+//  static const AndroidNotificationChannel channel = const AndroidNotificationChannel(
+//    id: 'some_channel_id',
+//    name: 'My app feature that requires notifications',
+//    description: 'Grant this app the ability to show notifications for this app feature',
+//    importance: AndroidNotificationChannelImportance.HIGH, // default value for constructor
+//    vibratePattern: AndroidVibratePatterns.DEFAULT, // default value for constructor
+//  );
 
 
-
-  void notify() async{
-    await LocalNotifications.createAndroidNotificationChannel(channel: channel);
-    await LocalNotifications.createNotification(
-        title: "Basic",
-        content: "Notification",
-        id: 0,
-        androidSettings: new AndroidSettings(
-            channel: channel
-        )
-    );
-
-  }
+//
+//  void notify() async{
+//    await LocalNotifications.createAndroidNotificationChannel(channel: channel);
+//    await LocalNotifications.createNotification(
+//        title: "Basic",
+//        content: "Notification",
+//        id: 0,
+//        androidSettings: new AndroidSettings(
+//            channel: channel
+//        )
+//    );
+//
+//  }
 
 
 
