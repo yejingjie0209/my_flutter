@@ -22,10 +22,12 @@ import com.love.activity.R
 import com.love.extension.doRequest
 import com.love.extension.toast
 import com.love.helper.CacheHelper
+import com.love.helper.CacheHelper.NOTIFY_TIME
 import com.love.helper.WeatherHelper
 import com.love.model.Weather
 import com.love.model.WeatherTime
 import com.love.network.DataRequest
+import com.love.utils.PermissionUtils
 import com.xdandroid.hellodaemon.AbsWorkService
 import java.util.*
 
@@ -42,6 +44,16 @@ class NotifyService : AbsWorkService() {
     companion object {
         val NOTICE_ID = 100
         var noticeId = 0x1
+
+        //        const val AM = 6
+//        const val PM = 22
+//        const val PERIOD = 5 * 60 * 1000
+
+        //TEST
+        const val AM = 14
+        const val PM = 16
+        const val PERIOD = 30 * 1000L
+
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -108,8 +120,11 @@ class NotifyService : AbsWorkService() {
             mTimer2 = Timer()
             mTask2 = object : TimerTask() {
                 override fun run() {
-                    Log.d("jason", "sendNotify")
-                    getTime()
+//                    Log.d("jason", "sendNotify")
+                    if (PermissionUtils.checkNotify(this@NotifyService)) {
+                        getTime()
+                    }
+
 //                    getWeather(WeatherTime.TOMORROW)
 
 //                    handler.post {
@@ -118,122 +133,60 @@ class NotifyService : AbsWorkService() {
 
                 }
             }
-            mTimer2?.schedule(mTask2, 0, 1000 * 30)
+            mTimer2?.schedule(mTask2, 0, PERIOD)
         }
     }
+
 
     private fun getTime() {
         val now = Calendar.getInstance()
-        Log.d("jason", "年: " + now.get(Calendar.YEAR))
-        Log.d("jason", "月: " + (now.get(Calendar.MONTH) + 1) + "")
-        Log.d("jason", "日: " + now.get(Calendar.DAY_OF_MONTH))
-        Log.d("jason", "时: " + now.get(Calendar.HOUR_OF_DAY))
-        Log.d("jason", "分: " + now.get(Calendar.MINUTE))
-        Log.d("jason", "秒: " + now.get(Calendar.SECOND))
+//        Log.d("jason", "年: " + now.get(Calendar.YEAR))
+//        Log.d("jason", "月: " + (now.get(Calendar.MONTH) + 1) + "")
+//        Log.d("jason", "日: " + now.get(Calendar.DAY_OF_MONTH))
+//        Log.d("jason", "时: " + now.get(Calendar.HOUR_OF_DAY))
+//        Log.d("jason", "分: " + now.get(Calendar.MINUTE))
+//        Log.d("jason", "秒: " + now.get(Calendar.SECOND))
 
-        val day = now.get(Calendar.DAY_OF_MONTH)
-        val hour = now.get(Calendar.MINUTE)
-        if (hour == 6) {
-            CacheHelper.get {
+        val hour = now.get(Calendar.HOUR_OF_DAY)
+        if (hour == AM) {
+            Log.d("jason", "AM时: " + now.get(Calendar.HOUR_OF_DAY))
+            if (CacheHelper.get("$NOTIFY_TIME$AM", true) == true) {
+                WeatherHelper.instance.getWeather(WeatherTime.TODAY, { weather ->
+                    sendNotification(weather)
+                    Log.d("jason", "AM时:$weather ")
+                    CacheHelper.save {
+                        putBoolean("$NOTIFY_TIME$AM", false)
+                    }
+                }, {
+                    toast("天气获取失败：$it")
+                })
+            }
+        } else if (hour == PM) {
+            Log.d("jason", "PM时: " + now.get(Calendar.HOUR_OF_DAY))
+            if (CacheHelper.get("$NOTIFY_TIME$PM", true) == true) {
+                WeatherHelper.instance.getWeather(WeatherTime.TOMORROW, { weather ->
+                    Log.d("jason", "PM时:$weather ")
+                    sendNotification(weather)
+                    CacheHelper.save {
+                        putBoolean("$NOTIFY_TIME$PM", false)
+                    }
+                }, {
+                    toast("天气获取失败：$it")
+                })
 
             }
 
-            CacheHelper.save {
-
-            }
-
-        }
-
-        if (hour == 22) {
-
-        }
-    }
-
-    private fun getWeather(time: WeatherTime) {
-        DataRequest.create().getWeather().doRequest(WeatherHelper.TAG) {
-            val weather = getWeather(it.result, time)
-            sendNotification(weather)
-        }.onError { i, s ->
-            toast("获取天气$s")
-        }
-    }
-
-    private fun getWeather(result: Weather.ResultBean?, time: WeatherTime): String {
-        return when (time) {
-            WeatherTime.TODAY -> {
-                val future = result?.future?.get(0)
-                "今天${future?.weather}，${getWidMsg(future?.wid)}${getTemperatureMsg(future?.temperature, future?.wid, time)}"
-            }
-            WeatherTime.TOMORROW -> {
-                val future = result?.future?.get(1)
-                "明天${future?.weather}，${getWidMsg(future?.wid)}${getTemperatureMsg(future?.temperature, future?.wid, time)}"
-            }
-        }
-    }
-
-
-    fun getWidMsg(wid: Weather.ResultBean.FutureBean.WidBean?): String {
-        val sb = StringBuffer()
-        val day = (wid?.day)!!.toInt()
-        val night = (wid.night)!!.toInt()
-        if (isRain(day) || isRain(night)) {
-            //雨
-            sb.append("记得带伞，");
-        }
-
-        if (isSnow(day) || isSnow(night)) {
-            //雪
-            sb.append("想陪你一起看雪，");
-        }
-
-        if ((day == 53 || night == 53)) {
-            //霾
-            sb.append("建议带好口罩出门，");
-        }
-        print("weather=$day");
-        return "$sb"
-    }
-
-
-    fun getTemperatureMsg(temperature: String?, wid: Weather.ResultBean.FutureBean.WidBean?, time: WeatherTime): String {
-        val list = temperature?.split("/");
-        val sb = StringBuffer("气温");
-        if (list?.size == 1) {
-            sb.append(list[0])
         } else {
-            sb.append(list?.get(0) + "~" + list?.get(1))
-        }
-
-        if (time == WeatherTime.TOMORROW) {
-            var t1 = list?.get(1)?.replace("℃", "");
-            if ((t1)!!.toInt() >= 32) {
-                //晴天且温度大于
-                sb.append(",天很热！");
-                if (isFineOrloudy((wid?.day)!!.toInt())) {
-                    sb.append("出门注意防晒！")
-                }
+            Log.d("jason", "时: " + now.get(Calendar.HOUR_OF_DAY))
+            CacheHelper.save {
+                putBoolean("$NOTIFY_TIME$AM", true)
             }
-
-            var t0 = list?.get(0)?.replace("℃", "");
-            if ((t0)!!.toInt() < 0) {
-                sb.append(",天很冷！出门多穿点衣服！")
+            CacheHelper.save {
+                putBoolean("$NOTIFY_TIME$PM", true)
             }
         }
-
-        return sb.toString();
     }
 
-    fun isRain(wid: Int): Boolean {
-        return wid in 3..12 || wid == 19 || wid in 21..25
-    }
-
-    fun isFineOrloudy(wid: Int): Boolean {
-        return wid == 0 || wid == 1
-    }
-
-    fun isSnow(wid: Int): Boolean {
-        return wid in 13..17 || wid in 26..28
-    }
 
     override fun onDestroy() {
         super.onDestroy()

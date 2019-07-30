@@ -1,3 +1,5 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package com.love.helper
 
 import android.content.Context
@@ -10,7 +12,9 @@ import android.content.SharedPreferences
  * @date :2019-07-30 10:33
  */
 object CacheHelper {
-    var sp: SharedPreferences? = null
+    const val NOTIFY_TIME = "notify_time_"
+
+    private var sp: SharedPreferences? = null
 
     fun init(context: Context) {
         sp = context.getSharedPreferences(context.packageName, MODE_PRIVATE)
@@ -24,10 +28,12 @@ object CacheHelper {
         edit?.apply()
     }
 
-    fun get(action: SharedPreferences.() -> Unit) {
-        if (sp != null) {
-            action(sp!!)
+    fun <T > get(key: String, defaultValue: T?): T? {
+        val all = sp?.all
+        if (all?.isNotEmpty() == true && all.containsKey(key)) {
+            return (all[key] ?: defaultValue) as? T
         }
+        return defaultValue
     }
 
 }

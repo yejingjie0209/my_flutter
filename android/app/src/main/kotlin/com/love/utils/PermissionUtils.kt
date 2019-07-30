@@ -1,5 +1,6 @@
 package com.love.utils
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface.BUTTON_NEGATIVE
@@ -28,40 +29,42 @@ object PermissionUtils {
         val isEnabled = notification.areNotificationsEnabled()
         if (!isEnabled) {
             //未打开通知
-            val alertDialog = AlertDialog.Builder(context)
-                    .setTitle("提示")
-                    .setMessage("请jason在“通知”中打开通知权限")
-                    .setNegativeButton("我就不") { dialog, _ -> dialog.cancel() }
-                    .setPositiveButton("好哒") { dialog, _ ->
-                        dialog.cancel()
-                        val intent = Intent()
-                        when {
-                            SDK_INT >= O -> {
-                                intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
-                                intent.putExtra("android.provider.extra.APP_PACKAGE", context.packageName)
+            if(context is Activity){
+                val alertDialog = AlertDialog.Builder(context)
+                        .setTitle("提示")
+                        .setMessage("请jason在“通知”中打开通知权限")
+                        .setNegativeButton("我就不") { dialog, _ -> dialog.cancel() }
+                        .setPositiveButton("好哒") { dialog, _ ->
+                            dialog.cancel()
+                            val intent = Intent()
+                            when {
+                                SDK_INT >= O -> {
+                                    intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
+                                    intent.putExtra("android.provider.extra.APP_PACKAGE", context.packageName)
+                                }
+                                SDK_INT >= LOLLIPOP -> {  //5.0
+                                    intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
+                                    intent.putExtra("app_package", context.packageName)
+                                    intent.putExtra("app_uid", context.applicationInfo.uid)
+                                    context.startActivity(intent)
+                                }
+                                SDK_INT == KITKAT -> {  //4.4
+                                    intent.action = ACTION_APPLICATION_DETAILS_SETTINGS
+                                    intent.addCategory(CATEGORY_DEFAULT)
+                                    intent.data = Uri.parse("package:" + context.packageName)
+                                }
+                                SDK_INT >= 16 -> {
+                                    intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+                                    intent.action = "android.settings.APPLICATION_DETAILS_SETTINGS"
+                                    intent.data = fromParts("package", context.packageName, null)
+                                }
                             }
-                            SDK_INT >= LOLLIPOP -> {  //5.0
-                                intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
-                                intent.putExtra("app_package", context.packageName)
-                                intent.putExtra("app_uid", context.applicationInfo.uid)
-                                context.startActivity(intent)
-                            }
-                            SDK_INT == KITKAT -> {  //4.4
-                                intent.action = ACTION_APPLICATION_DETAILS_SETTINGS
-                                intent.addCategory(CATEGORY_DEFAULT)
-                                intent.data = Uri.parse("package:" + context.packageName)
-                            }
-                            SDK_INT >= 16 -> {
-                                intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
-                                intent.action = "android.settings.APPLICATION_DETAILS_SETTINGS"
-                                intent.data = fromParts("package", context.packageName, null)
-                            }
-                        }
-                        context.startActivity(intent)
-                    }.create()
-            alertDialog.show()
-            alertDialog.getButton(BUTTON_NEGATIVE).setTextColor(Color.BLACK)
-            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK)
+                            context.startActivity(intent)
+                        }.create()
+                alertDialog.show()
+                alertDialog.getButton(BUTTON_NEGATIVE).setTextColor(Color.BLACK)
+                alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK)
+            }
         }
         return isEnabled
     }
