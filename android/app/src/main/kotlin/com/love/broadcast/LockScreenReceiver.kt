@@ -24,10 +24,10 @@ class LockScreenReceiver : BroadcastReceiver() {
 //        if (Intent.ACTION_SCREEN_ON.equals(intent?.action)) {
 //
 //        }
-        DaemonEnv.initialize(
-                context!!,  //Application Context.
-                NotifyService::class.java, //刚才创建的 Service 对应的 Class 对象.
-                1000 * 20) //定时唤醒的时间间隔(ms), 默认 6 分钟.
+//        DaemonEnv.initialize(
+//                context!!,  //Application Context.
+//                NotifyService::class.java, //刚才创建的 Service 对应的 Class 对象.
+//                1000 * 20) //定时唤醒的时间间隔(ms), 默认 6 分钟.
         if (SDK_INT >= O) {
             context?.startForegroundService(Intent(context, NotifyService::class.java))
         } else {

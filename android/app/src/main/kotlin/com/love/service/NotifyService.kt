@@ -1,35 +1,34 @@
 package com.love.service
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
+import android.app.*
 import android.app.NotificationManager.IMPORTANCE_HIGH
-import android.app.PendingIntent
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.os.Build
-import android.os.Handler
-import android.os.IBinder
-import android.os.Looper
+import android.os.*
 import android.support.v4.app.NotificationCompat
 import android.util.Log
 import com.love.MyApplication
 import com.love.activity.MainActivity
 import com.love.activity.R
-import com.love.extension.doRequest
 import com.love.extension.toast
 import com.love.helper.CacheHelper
 import com.love.helper.CacheHelper.NOTIFY_TIME
 import com.love.helper.WeatherHelper
-import com.love.model.Weather
 import com.love.model.WeatherTime
-import com.love.network.DataRequest
 import com.love.utils.PermissionUtils
-import com.xdandroid.hellodaemon.AbsWorkService
+import java.lang.Thread.sleep
 import java.util.*
+import android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP
+import android.app.PendingIntent.getBroadcast
+import android.os.SystemClock.elapsedRealtime
+import com.love.broadcast.AlarmReceive
+import android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP
+import android.app.PendingIntent.getBroadcast
+import android.os.SystemClock.elapsedRealtime
+
+
 
 
 /**
@@ -37,9 +36,9 @@ import java.util.*
  * @description:
  * @date :2019-07-23 18:33
  */
-class NotifyService : AbsWorkService() {
-    private var mTimer2: Timer? = null
-    private var mTask2: TimerTask? = null
+class NotifyService : Service() {
+//    private var mTimer2: Timer? = null
+//    private var mTask2: TimerTask? = null
 
     companion object {
         val NOTICE_ID = 100
@@ -49,9 +48,9 @@ class NotifyService : AbsWorkService() {
 //        const val PM = 22
 //        const val PERIOD = 5 * 60 * 1000
 
-        //TEST
-        const val AM = 14
-        const val PM = 16
+        //TES
+        const val AM = 19
+        const val PM = 20
         const val PERIOD = 30 * 1000L
 
     }
@@ -108,91 +107,119 @@ class NotifyService : AbsWorkService() {
             startService(intent)
         }
 
+        Log.d("jason", "onStartCommand")
         timer()
         return START_STICKY
     }
 
-    private val handler = Handler(Looper.getMainLooper())
 
     fun timer() {
-        var i = 0x123
-        if (mTimer2 == null && mTask2 == null) {
-            mTimer2 = Timer()
-            mTask2 = object : TimerTask() {
-                override fun run() {
-//                    Log.d("jason", "sendNotify")
-                    if (PermissionUtils.checkNotify(this@NotifyService)) {
-                        getTime()
-                    }
+//        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+//        val pendingIntent = PendingIntent(AlarmReceive::class.java)
+//        pendingIntent.action = "com.live.alarm_action"
+//        val pi = getBroadcast(this, 0x2331, pendingIntent,   PendingIntent.FLAG_UPDATE_CURRENT)
+////        am.setRepeating(ELAPSED_REALTIME_WAKEUP, 5000, 60*1000, pi)
+//
+//        Log.d("jason","timer")
+////        if (PermissionUtils.checkNotify(this@NotifyService)) {
+////            getTime()
+////        }
+//        val anhour = 6 * 1000
+//        val triggerAtMillis = SystemClock.elapsedRealtime() + anhour
+//
+////        alarmManager.cancel(pendingIntent)
+//
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {// 6.0
+//            alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, pendingIntent);
+//        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {//  4.4
+//            alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,triggerAtMillis, pendingIntent);
+//        } else {
+//            alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,triggerAtMillis, pendingIntent);
+//        }
 
-//                    getWeather(WeatherTime.TOMORROW)
 
-//                    handler.post {
-//                        FlutterPluginEvent.instance.eventSink?.success(EVENT_GET_TODAY_WEATHER)
+    }
+
+
+//        Log.d("jason", "timer")
+////        if (mTimer2 == null && mTask2 == null) {
+//        if (mTimer2 != null && mTask2 != null) {
+//            mTimer2?.cancel()
+//            mTask2?.cancel()
+//        }
+//        Log.d("jason", "timer进来 ")
+//        mTimer2 = Timer()
+//        mTask2 = object : TimerTask() {
+//            override fun run() {
+//                if (PermissionUtils.checkNotify(this@NotifyService)) {
+//                    getTime()
+//                }
+//
+//            }
+//        }
+//        mTimer2?.schedule(mTask2, 0, PERIOD)
+
+
+//    private fun getTime() {
+//        val now = Calendar.getInstance()
+////        Log.d("jason", "年: " + now.get(Calendar.YEAR))
+////        Log.d("jason", "月: " + (now.get(Calendar.MONTH) + 1) + "")
+////        Log.d("jason", "日: " + now.get(Calendar.DAY_OF_MONTH))
+////        Log.d("jason", "时: " + now.get(Calendar.HOUR_OF_DAY))
+////        Log.d("jason", "分: " + now.get(Calendar.MINUTE))
+////        Log.d("jason", "秒: " + now.get(Calendar.SECOND))
+//
+//        val hour = now.get(Calendar.HOUR_OF_DAY)
+//        if (hour == AM) {
+//            Log.d("jason", "AM时: " + now.get(Calendar.HOUR_OF_DAY))
+//            if (CacheHelper.get("$NOTIFY_TIME$AM", true) == true) {
+//                WeatherHelper.instance.getWeather(WeatherTime.TODAY, { weather ->
+//                    sendNotification(weather)
+//                    Log.d("jason", "AM时:$weather ")
+//                    CacheHelper.save {
+//                        putBoolean("$NOTIFY_TIME$AM", false)
 //                    }
-
-                }
-            }
-            mTimer2?.schedule(mTask2, 0, PERIOD)
-        }
-    }
-
-
-    private fun getTime() {
-        val now = Calendar.getInstance()
-//        Log.d("jason", "年: " + now.get(Calendar.YEAR))
-//        Log.d("jason", "月: " + (now.get(Calendar.MONTH) + 1) + "")
-//        Log.d("jason", "日: " + now.get(Calendar.DAY_OF_MONTH))
-//        Log.d("jason", "时: " + now.get(Calendar.HOUR_OF_DAY))
-//        Log.d("jason", "分: " + now.get(Calendar.MINUTE))
-//        Log.d("jason", "秒: " + now.get(Calendar.SECOND))
-
-        val hour = now.get(Calendar.HOUR_OF_DAY)
-        if (hour == AM) {
-            Log.d("jason", "AM时: " + now.get(Calendar.HOUR_OF_DAY))
-            if (CacheHelper.get("$NOTIFY_TIME$AM", true) == true) {
-                WeatherHelper.instance.getWeather(WeatherTime.TODAY, { weather ->
-                    sendNotification(weather)
-                    Log.d("jason", "AM时:$weather ")
-                    CacheHelper.save {
-                        putBoolean("$NOTIFY_TIME$AM", false)
-                    }
-                }, {
-                    toast("天气获取失败：$it")
-                })
-            }
-        } else if (hour == PM) {
-            Log.d("jason", "PM时: " + now.get(Calendar.HOUR_OF_DAY))
-            if (CacheHelper.get("$NOTIFY_TIME$PM", true) == true) {
-                WeatherHelper.instance.getWeather(WeatherTime.TOMORROW, { weather ->
-                    Log.d("jason", "PM时:$weather ")
-                    sendNotification(weather)
-                    CacheHelper.save {
-                        putBoolean("$NOTIFY_TIME$PM", false)
-                    }
-                }, {
-                    toast("天气获取失败：$it")
-                })
-
-            }
-
-        } else {
-            Log.d("jason", "时: " + now.get(Calendar.HOUR_OF_DAY))
-            CacheHelper.save {
-                putBoolean("$NOTIFY_TIME$AM", true)
-            }
-            CacheHelper.save {
-                putBoolean("$NOTIFY_TIME$PM", true)
-            }
-        }
-    }
+//                }, {
+//                    toast("天气获取失败：$it")
+//                })
+//            }
+//        } else if (hour == PM) {
+//            Log.d("jason", "PM时: " + now.get(Calendar.HOUR_OF_DAY))
+//            if (CacheHelper.get("$NOTIFY_TIME$PM", true) == true) {
+//                WeatherHelper.instance.getWeather(WeatherTime.TOMORROW, { weather ->
+//                    Log.d("jason", "PM时:$weather ")
+//                    sendNotification(weather)
+//                    CacheHelper.save {
+//                        putBoolean("$NOTIFY_TIME$PM", false)
+//                    }
+//                }, {
+//                    toast("天气获取失败：$it")
+//                })
+//
+//            }
+//
+//        } else {
+//            Log.d("jason", "时: " + now.get(Calendar.HOUR_OF_DAY))
+//            CacheHelper.save {
+//                putBoolean("$NOTIFY_TIME$AM", true)
+//            }
+//            CacheHelper.save {
+//                putBoolean("$NOTIFY_TIME$PM", true)
+//            }
+//        }
+//    }
 
 
     override fun onDestroy() {
         super.onDestroy()
-        mTask2?.cancel()
-        mTask2 = null
-        mTimer2 = null
+//        mTask2?.cancel()
+//        mTimer2?.cancel()
+//        mTask2 = null
+//        mTimer2 = null
+//        handler?.removeCallbacksAndMessages(null)
+//        handler = null
+//        handlerThread?.interrupt()
+//        handlerThread = null
 
 
         // 如果Service被杀死，干掉通知
@@ -200,7 +227,7 @@ class NotifyService : AbsWorkService() {
             val mManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             mManager.cancel(NOTICE_ID)
         }
-        Log.d(TAG, "DaemonService---->onDestroy，前台service被杀死")
+        Log.d("jason", "DaemonService---->onDestroy，前台service被杀死")
         // 重启自己
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(Intent(this, NotifyService::class.java))
@@ -210,72 +237,26 @@ class NotifyService : AbsWorkService() {
     }
 
 
-    override fun onBind(intent: Intent?, alwaysNull: Void?): IBinder? {
-        return null
-    }
+//    override fun onBind(intent: Intent?, alwaysNull: Void?): IBinder? {
+//        return null
+//    }
+//
+//    override fun startWork(intent: Intent?, flags: Int, startId: Int) {
+//    }
+//
+//    override fun isWorkRunning(intent: Intent?, flags: Int, startId: Int): Boolean {
+//        return false
+//    }
+//
+//    override fun shouldStopService(intent: Intent?, flags: Int, startId: Int): Boolean {
+//        return false
+//    }
+//
+//    override fun stopWork(intent: Intent?, flags: Int, startId: Int) {
+//    }
+//
+//    override fun onServiceKilled(rootIntent: Intent?) {
+//    }
 
-    override fun startWork(intent: Intent?, flags: Int, startId: Int) {
-    }
 
-    override fun isWorkRunning(intent: Intent?, flags: Int, startId: Int): Boolean {
-        return false
-    }
-
-    override fun shouldStopService(intent: Intent?, flags: Int, startId: Int): Boolean {
-        return false
-    }
-
-    override fun stopWork(intent: Intent?, flags: Int, startId: Int) {
-    }
-
-    override fun onServiceKilled(rootIntent: Intent?) {
-    }
-
-    private fun sendNotification(msg: String) {
-        val notificationManager = MyApplication.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            //26及以上
-            val notificationChannel = NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT)
-            notificationChannel.canBypassDnd()//可否绕过请勿打扰模式
-            notificationChannel.canShowBadge()//桌面lanchener显示角标
-            notificationChannel.enableLights(true)//闪光
-            notificationChannel.shouldShowLights()//闪光
-            notificationChannel.lockscreenVisibility = Notification.VISIBILITY_SECRET//锁屏显示通知
-            notificationChannel.enableVibration(true)//是否允许震动
-            notificationChannel.vibrationPattern = longArrayOf(100, 100, 200)//设置震动方式（事件长短）
-            notificationChannel.audioAttributes//获取系统响铃配置
-            notificationChannel.group//获取消息渠道组
-            notificationChannel.setBypassDnd(true)
-            notificationChannel.description = "description"
-            notificationChannel.lightColor = Color.GREEN//制定闪灯是灯光颜色
-            notificationChannel.setShowBadge(true)
-            notificationManager.createNotificationChannel(notificationChannel)
-
-            val builder = Notification.Builder(MyApplication.instance.applicationContext, "id")
-            builder.setSmallIcon(R.mipmap.ic_launcher)
-            builder.setAutoCancel(true)
-            builder.setChannelId("id")
-            builder.setWhen(System.currentTimeMillis())
-            builder.setContentTitle("标题")
-            builder.setContentText(msg)
-            builder.setNumber(3)
-//            val intent = Intent(this, SecondActivity::class.java)
-//            val pendingIntent = PendingIntent.getActivity(this, PENDING_INTENT_REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-//            builder.setContentIntent(pendingIntent)
-
-            notificationManager.notify(NotifyService.noticeId++, builder.build())
-        } else {
-            val builder = NotificationCompat.Builder(MyApplication.instance.applicationContext)
-            builder.setSmallIcon(R.mipmap.ic_launcher)
-            builder.setAutoCancel(true)
-            builder.setWhen(System.currentTimeMillis())
-            builder.setContentTitle("标题")
-            builder.setContentText(msg)
-//            val intent = Intent(this, SecondActivity::class.java)
-//            val pendingIntent = PendingIntent.getActivity(this, PENDING_INTENT_REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-//            builder.setContentIntent(pendingIntent)
-            notificationManager.notify(2, builder.build())
-        }
-
-    }
 }

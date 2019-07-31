@@ -25,10 +25,10 @@ class MyApplication : FlutterApplication() {
         super.onCreate()
         instance = this
         CacheHelper.init(this)
-        DaemonEnv.initialize(
-                this,  //Application Context.
-                NotifyService::class.java, //刚才创建的 Service 对应的 Class 对象.
-                1000 * 20) //定时唤醒的时间间隔(ms), 默认 6 分钟.
+//        DaemonEnv.initialize(
+//                this,  //Application Context.
+//                NotifyService::class.java, //刚才创建的 Service 对应的 Class 对象.
+//                1000 * 20) //定时唤醒的时间间隔(ms), 默认 6 分钟.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(Intent(this, NotifyService::class.java))
         } else {

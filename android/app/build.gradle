@@ -39,7 +39,7 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.love.my_flutter"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -76,4 +76,7 @@ dependencies {
     api 'com.squareup.okhttp3:logging-interceptor:3.10.0'
     api 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
     api 'io.reactivex.rxjava2:rxandroid:2.1.0'
+
+    api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.0.1'
+    api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.0.1'
 }

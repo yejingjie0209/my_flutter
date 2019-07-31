@@ -73,5 +73,12 @@
 
             </intent-filter>
         </receiver>
+
+        <receiver android:name="com.love.broadcast.AlarmReceive">
+            <intent-filter>
+                <action android:name="com.live.alarm_action" />
+            </intent-filter>
+        </receiver>
+
     </application>
 </manifest>
